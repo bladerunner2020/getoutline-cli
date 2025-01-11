@@ -8,6 +8,12 @@ setup(
         'pyyaml',
         'requests',
     ],
+    extras_require={
+        'dev': [
+            'twine',
+            'wheel',
+        ],
+    },
     entry_points={
         'console_scripts': [
             'outline-cli=outline_cli.outline_cli:main',
