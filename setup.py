@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='getoutline-cli',
-    version='0.1.0',
+    version='0.2.0',
     packages=find_packages(),
     install_requires=[
         'pyyaml',
@@ -12,11 +12,12 @@ setup(
         'dev': [
             'twine',
             'wheel',
+            'flake8',
         ],
     },
     entry_points={
         'console_scripts': [
-            'getoutline-cli=outline_cli.outline_cli:main',
+            'getoutline-cli=getoutline_cli.getoutline_cli:main',
         ],
     },
     author='Alexander Pivovarov',
