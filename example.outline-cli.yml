@@ -1,0 +1,18 @@
+url: https://outline.example.com
+token: YOUR_OUTLINE_API_TOKEN
+
+files:
+  - path: CHANGELOG.md
+    id: YOUR_ID_1
+    substitutions:
+      # Remove links to git commits
+      - " ?\\(\\[[a-z0-9]+\\]\\(https://git\\.example\\.com/.+\\)\\)": ""
+      # Remove commits without JIRA issues (DEV-XXXX)
+      - "^\\* (?!.*\\(DEV-\\d+\\)).*$\\n": ""
+      # Remove empty sections
+      -  "### .+\\n+": ""
+  - path: README.md
+    id: YOUR_ID_2
+    title: README
+    append: false
+    publish: true
