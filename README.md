@@ -1,6 +1,6 @@
-# Outline CLI
+# GetOutline CLI
 
-**outline-cli** is an unofficial command-line interface for publishing markdown files to [Outline](https://getoutline.com/).
+**getoutline-cli** is an unofficial command-line interface for publishing markdown files to [Outline](https://getoutline.com/).
 The primary goal of this project is to automate the process of publishing markdown files to Outline in CI/CD pipelines.
 
 It allows to publish **CHANGELOG.md**, **README.md**, or any other markdown file to an Outline wiki.
@@ -11,7 +11,7 @@ Alternatively, you can specify configuration file using `--config` option.
 ## Installation and usage
 
 ```bash
-pip install outline-cli
+pip install getoutline-cli
 ./outline-cli
 ```
 

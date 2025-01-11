@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='outline-cli',
+    name='getoutline-cli',
     version='0.1.0',
     packages=find_packages(),
     install_requires=[
@@ -16,7 +16,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'outline-cli=outline_cli.outline_cli:main',
+            'getoutline-cli=outline_cli.outline_cli:main',
         ],
     },
     author='Alexander Pivovarov',
@@ -24,7 +24,7 @@ setup(
     description='CLI utility for publishing markdown files to Outline wiki',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/yourusername/outline-cli',
+    url='https://github.com/bladerunner2020/getoutline-cli.git',
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
