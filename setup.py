@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='getoutline-cli',
-    version='0.4.1',
+    version='0.4.2',
     packages=find_packages(),
     install_requires=[
         'pyyaml',
@@ -26,6 +26,12 @@ setup(
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/bladerunner2020/getoutline-cli.git',
+    project_urls={
+        'Homepage': 'https://github.com/bladerunner2020/getoutline-cli#readme',
+        'Bug Tracker':
+        'https://github.com/bladerunner2020/getoutline-cli/issues',
+        'Source': 'https://github.com/bladerunner2020/getoutline-cli',
+    },
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',

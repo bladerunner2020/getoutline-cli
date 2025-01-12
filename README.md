@@ -79,11 +79,6 @@ files:
     publish: true
 ```
 
-## Keywords
-
-- GetOutline
-- CI/CD
-
 ## Authors
 
 - Alexander Pivovarov
