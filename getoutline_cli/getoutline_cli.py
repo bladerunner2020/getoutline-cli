@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import yaml
 import re
 import requests
@@ -91,14 +92,22 @@ def main():
 
     config = load_config(args.config)
 
-    # Required parameters
-    url = config.get('url')
+    # Setup Outline URL
+    url = config.get('url') or os.getenv('OUTLINE_API_URL')
     if not url:
-        raise ValueError('Missing URL in configuration.')
-    token = config.get('token')
-    if not token:
-        raise ValueError('Missing token in configuration.')
+        raise ValueError('Outline URL is required either in the configuration '
+                         'file (field `url`) or as an environment variable '
+                         '`OUTLINE_API_URL`.')
 
+    # Setup Outline API token
+    token = config.get('token') or os.getenv('OUTLINE_API_TOKEN')
+    if not token:
+        raise ValueError(
+            'Outline API token is required either in the configuration file '
+            '(field `token`) or as an environment variable '
+            '`OUTLINE_API_TOKEN.`')
+
+    # Setup files to publish
     files = config.get('files')
     if not files:
         raise ValueError('Missing files in configuration.')

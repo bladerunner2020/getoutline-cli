@@ -1,6 +1,10 @@
+# Required if not specified via environment variable OUTLINE_URL
 url: https://outline.example.com
+
+# Required if not specified via environment variable OUTLINE_API_TOKEN
 token: YOUR_OUTLINE_API_TOKEN
 
+# List of files to upload (required)
 files:
   - path: CHANGELOG.md
     id: YOUR_ID_1

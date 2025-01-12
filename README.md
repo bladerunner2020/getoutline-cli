@@ -12,15 +12,20 @@ Alternatively, you can specify configuration file using `--config` option.
 
 ```bash
 pip install getoutline-cli
-./outline-cli
+./getoutline-cli
 ```
+
+## Environment Variables
+
+- `OUTLINE_API_TOKEN` - Outline API token (required if not specified in the configuration file)
+- `OUTLINE_URL` - Outline URL (e.g., `https://wiki.example.com`) (required if not specified in the configuration file)
 
 ## Configuration file
 
 The configuration file is a YAML file containing the following fields:
 
-- `token` - Outline API token (required)
-- `url` - Outline URL (e.g., `https://wiki.example.com`) (required)
+- `token` - Outline API token (required if not specified in the environment variables)
+- `url` - Outline URL (e.g., `https://wiki.example.com`) (required if not specified in the environment variables)
 - `files` - List of files to publish (required)
 
 The `files` field is a list of dictionaries with the following fields:
