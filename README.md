@@ -12,7 +12,24 @@ Alternatively, you can specify configuration file using `--config` option.
 
 ```bash
 pip install getoutline-cli
-./getoutline-cli
+```
+
+To publish markdown files to Outline, run the following command:
+
+```bash
+getoutline
+```
+
+To specify the configuration file, use the `--config` option:
+
+```bash
+getoutline --config some_config.yml
+```
+
+To preview the changes without publishing, use the `--preview` option:
+
+```bash
+getoutline --preview
 ```
 
 ## Environment Variables
@@ -61,6 +78,11 @@ files:
     append: false
     publish: true
 ```
+
+## Keywords
+
+- GetOutline
+- CI/CD
 
 ## Authors
 

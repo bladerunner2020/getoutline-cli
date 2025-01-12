@@ -88,16 +88,23 @@ def main():
     parser.add_argument('--config',
                         help='Path to the configuration yaml file.',
                         default='.outline-cli.yml')
-    args = parser.parse_args()
 
+    parser.add_argument('--preview',
+                        help='Preview the changes without publishing.',
+                        action='store_true')
+
+    args = parser.parse_args()
+    preview = args.preview
+
+    # Load configuration file
     config = load_config(args.config)
 
     # Setup Outline URL
-    url = config.get('url') or os.getenv('OUTLINE_API_URL')
+    url = config.get('url') or os.getenv('OUTLINE_URL')
     if not url:
         raise ValueError('Outline URL is required either in the configuration '
                          'file (field `url`) or as an environment variable '
-                         '`OUTLINE_API_URL`.')
+                         '`OUTLINE_URL`.')
 
     # Setup Outline API token
     token = config.get('token') or os.getenv('OUTLINE_API_TOKEN')
@@ -134,9 +141,15 @@ def main():
         # Apply substitutions if any
         content = apply_substitutions(content, substitutions)
 
-        # Publish the file to the Outline wiki
-        publish_file(url, token, document_id, title, content, append, publish)
-        print(f'Published: {path} => {url}/doc/{document_id}')
+        if preview:
+            # Preview the changes without publishing
+            print(f'Previewing: {path} => {url}/doc/{document_id}')
+            print(content)
+        else:
+            # Publish the file to the Outline wiki
+            publish_file(url, token, document_id, title, content, append,
+                         publish)
+            print(f'Published: {path} => {url}/doc/{document_id}')
 
 
 if __name__ == '__main__':
