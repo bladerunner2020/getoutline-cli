@@ -17,19 +17,19 @@ pip install getoutline-cli
 To publish markdown files to Outline, run the following command:
 
 ```bash
-getoutline
+getoutline-cli
 ```
 
 To specify the configuration file, use the `--config` option:
 
 ```bash
-getoutline --config some_config.yml
+getoutline-cli --config some_config.yml
 ```
 
 To preview the changes without publishing, use the `--preview` option:
 
 ```bash
-getoutline --preview
+getoutline-cli --preview
 ```
 
 ## Environment Variables

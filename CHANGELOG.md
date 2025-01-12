@@ -1,12 +1,18 @@
 # Changelog
 
+## 0.4.1 (2025-01-12)
+
+### Fixed
+
+- Updated README.md with correct installation and usage instructions.
+
 ## 0.4.0 (2025-01-12)
 
 ### Added
 
 - Preview option to display document without publishing.
 
-### Changed
+### Fixed
 
 - Fixed `OUTLINE_URL` environment variable description.
 
