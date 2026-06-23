@@ -119,6 +119,8 @@ def main():
     if not files:
         raise ValueError('Missing files in configuration.')
 
+    global_substitutions = config.get('substitutions', [])
+
     for file_config in files:
         # Required parameters
         path = file_config.get('path')
@@ -133,7 +135,7 @@ def main():
         title = config.get('title')
         append = config.get('append', False)
         publish = config.get('publish', True)
-        substitutions = file_config.get('substitutions', [])
+        substitutions = global_substitutions + file_config.get('substitutions', [])
 
         with open(path, 'r') as file:
             content = file.read()

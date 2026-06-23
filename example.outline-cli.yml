@@ -4,13 +4,17 @@ url: https://outline.example.com
 # Required if not specified via environment variable OUTLINE_API_TOKEN
 token: YOUR_OUTLINE_API_TOKEN
 
+# Global substitutions applied to all documents (optional)
+substitutions:
+  # Remove links to git commits
+  - " ?\\(\\[[a-z0-9]+\\]\\(https://git\\.example\\.com/.+\\)\\)": ""
+
 # List of files to upload (required)
 files:
   - path: CHANGELOG.md
     id: YOUR_ID_1
+    # Per-document substitutions are applied after global ones
     substitutions:
-      # Remove links to git commits
-      - " ?\\(\\[[a-z0-9]+\\]\\(https://git\\.example\\.com/.+\\)\\)": ""
       # Remove commits without JIRA issues (DEV-XXXX)
       - "^\\* (?!.*\\(DEV-\\d+\\)).*$\\n": ""
       # Remove empty sections

@@ -43,6 +43,7 @@ The configuration file is a YAML file containing the following fields:
 
 - `token` - Outline API token (required if not specified in the environment variables)
 - `url` - Outline URL (e.g., `https://wiki.example.com`) (required if not specified in the environment variables)
+- `substitutions` - List of substitutions applied to all documents (optional)
 - `files` - List of files to publish (required)
 
 The `files` field is a list of dictionaries with the following fields:
@@ -52,22 +53,25 @@ The `files` field is a list of dictionaries with the following fields:
 - `title` - Title of the document in Outline (optional)
 - `append` - Append content to the existing document (optional, default is `False`)
 - `publish` - Publish the document after updating (optional, default is `True`)
-- `substitutions` - List of substitutions to apply to the content (optional)
+- `substitutions` - List of substitutions applied to this document only (optional)
 
 The `substitutions` field is a list of dictionaries `regex: replacement value`,
 applied to the content of the markdown file before publishing.
+Global substitutions are applied first, followed by per-document substitutions.
 
 ### Example Configuration File
 
 ```yaml
 url: https://wiki.example.com
 token: YOUR_OUTLINE_API_TOKEN
+# Applied to all documents
+substitutions:
+  - " ?\\(\\[[a-z0-9]+\\]\\(https://git\\.example\\.com/.+\\)\\)": ""
 files:
   - path: CHANGELOG.md
     id: YOUR_ID_1
+    # Applied only to this document, after global substitutions
     substitutions:
-      # Remove links to git commits
-      - " ?\\(\\[[a-z0-9]+\\]\\(https://git\\.example\\.com/.+\\)\\)": ""
       # Remove commits without JIRA issues (DEV-XXXX)
       - "^\\* (?!.*\\(DEV-\\d+\\)).*$\\n": ""
       # Remove empty sections
