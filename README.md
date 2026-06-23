@@ -59,6 +59,38 @@ The `substitutions` field is a list of dictionaries `regex: replacement value`,
 applied to the content of the markdown file before publishing.
 Global substitutions are applied first, followed by per-document substitutions.
 
+## Internal links
+
+If a markdown file contains links to other markdown files listed in the config,
+those links are automatically replaced with their Outline URLs before publishing.
+
+For example, if the config lists `documents/components/period-selector.md` with
+some document ID, then a link like:
+
+```markdown
+[Period Selector](../components/period-selector.md)
+```
+
+will be replaced with:
+
+```markdown
+[Period Selector](https://wiki.example.com/doc/period-selector-AbCdEfGhIj)
+```
+
+Links to files not listed in the config are left unchanged.
+External links (`http://`, `https://`) are never modified.
+
+### Anchor transliteration
+
+Anchor fragments containing non-ASCII characters are automatically transliterated.
+This matches the anchor format Outline uses for headings in non-Latin scripts.
+
+```markdown
+[Timezone selector](#часовой-пояс)  →  [Timezone selector](#h-chasovoj-poyas)
+```
+
+This applies both to same-page anchors and to anchors in cross-document links.
+
 ### Example Configuration File
 
 ```yaml
@@ -76,8 +108,10 @@ files:
       - "^\\* (?!.*\\(DEV-\\d+\\)).*$\\n": ""
       # Remove empty sections
       -  "### .+\\n+": ""
-  - path: README.md
+  - path: documents/components/period-selector.md
     id: YOUR_ID_2
+  - path: README.md
+    id: YOUR_ID_3
     title: README
     append: false
     publish: true
