@@ -4,6 +4,7 @@ import yaml
 import re
 import requests
 import argparse
+from importlib.metadata import version, PackageNotFoundError
 
 
 def load_config(config_path):
@@ -83,17 +84,24 @@ def main():
     """
     Main function to parse arguments and publish files to Outline wiki.
     """
+    try:
+        pkg_version = version('getoutline-cli')
+    except PackageNotFoundError:
+        pkg_version = 'dev'
+
     parser = argparse.ArgumentParser(
         description='Publish markdown files to Outline wiki.')
+    parser.add_argument('--version', action='version',
+                        version=f'getoutline-cli v{pkg_version}')
     parser.add_argument('--config',
                         help='Path to the configuration yaml file.',
                         default='.outline-cli.yml')
-
     parser.add_argument('--preview',
                         help='Preview the changes without publishing.',
                         action='store_true')
 
     args = parser.parse_args()
+    print(f'getoutline-cli v{pkg_version}')
     preview = args.preview
 
     # Load configuration file
