@@ -120,3 +120,5 @@ dmypy.json
 
 .outline-cli.yml
 test.md
+
+.claude
