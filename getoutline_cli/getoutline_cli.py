@@ -40,6 +40,49 @@ def apply_substitutions(content, substitutions):
     return content
 
 
+def fetch_document_url(base_url, token, document_id, cache):
+    if document_id in cache:
+        return cache[document_id]
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
+    response = requests.post(f'{base_url}/api/documents.info',
+                             headers=headers,
+                             json={'id': document_id})
+    response.raise_for_status()
+    doc_url = base_url.rstrip('/') + response.json()['data']['url']
+    cache[document_id] = doc_url
+    return doc_url
+
+
+def resolve_internal_links(content, file_path, path_to_id, base_url, token,
+                           url_cache):
+    file_dir = os.path.dirname(file_path)
+
+    def replace_link(match):
+        link_path = match.group(2)
+        if link_path.startswith(('http://', 'https://', '//')):
+            return match.group(0)
+        fragment = ''
+        if '#' in link_path:
+            link_path, fragment = link_path.split('#', 1)
+            fragment = '#' + fragment
+        resolved = os.path.normpath(os.path.join(file_dir, link_path))
+        document_id = path_to_id.get(resolved)
+        if document_id is None:
+            return match.group(0)
+        try:
+            doc_url = fetch_document_url(base_url, token, document_id,
+                                         url_cache)
+            return f'[{match.group(1)}]({doc_url}{fragment})'
+        except Exception as e:
+            print(f'Warning: failed to resolve link {resolved}: {e}')
+            return match.group(0)
+
+    return re.sub(r'\[([^\]]+)\]\(([^)]+)\)', replace_link, content)
+
+
 def publish_file(url, token, document_id, title, content, append, publish):
     """
     Publish the content to the Outline wiki.
@@ -129,6 +172,13 @@ def main():
 
     global_substitutions = config.get('substitutions', [])
 
+    path_to_id = {
+        os.path.normpath(fc['path']): fc['id']
+        for fc in files
+        if fc.get('path') and fc.get('id')
+    }
+    url_cache = {}
+
     for file_config in files:
         # Required parameters
         path = file_config.get('path')
@@ -147,6 +197,9 @@ def main():
 
         with open(path, 'r') as file:
             content = file.read()
+
+        content = resolve_internal_links(content, path, path_to_id, url, token,
+                                         url_cache)
 
         # Apply substitutions if any
         content = apply_substitutions(content, substitutions)
