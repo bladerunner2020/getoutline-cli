@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0 (2026-06-24)
+
+### Added
+
+- Global substitutions at the top level of config, applied to all documents before per-document substitutions.
+- `--version` flag to print the version and exit.
+- Print version on startup.
+- Automatic resolution of internal links: markdown links to files listed in config are replaced with their Outline URLs.
+- Transliteration of Cyrillic anchor fragments (e.g. `#часовой-пояс` → `#h-chasovoj-poyas`).
+
 ## 0.4.2 (2025-01-12)
 
 ### Fixed
