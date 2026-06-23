@@ -40,6 +40,24 @@ def apply_substitutions(content, substitutions):
     return content
 
 
+TRANSLIT_MAP = {
+    'а': 'a',  'б': 'b',  'в': 'v',  'г': 'g',  'д': 'd',
+    'е': 'e',  'ё': 'yo', 'ж': 'zh', 'з': 'z',  'и': 'i',
+    'й': 'j',  'к': 'k',  'л': 'l',  'м': 'm',  'н': 'n',
+    'о': 'o',  'п': 'p',  'р': 'r',  'с': 's',  'т': 't',
+    'у': 'u',  'ф': 'f',  'х': 'kh', 'ц': 'ts', 'ч': 'ch',
+    'ш': 'sh', 'щ': 'shch', 'ъ': '', 'ы': 'y',  'ь': '',
+    'э': 'e',  'ю': 'yu', 'я': 'ya',
+}
+
+
+def transliterate_anchor(raw_fragment):
+    if not raw_fragment or raw_fragment.isascii():
+        return raw_fragment
+    result = ''.join(TRANSLIT_MAP.get(ch, ch) for ch in raw_fragment.lower())
+    return 'h-' + result
+
+
 def fetch_document_url(base_url, token, document_id, cache):
     if document_id in cache:
         return cache[document_id]
@@ -61,24 +79,30 @@ def resolve_internal_links(content, file_path, path_to_id, base_url, token,
     file_dir = os.path.dirname(file_path)
 
     def replace_link(match):
+        original = match.group(0)
         link_path = match.group(2)
         if link_path.startswith(('http://', 'https://', '//')):
-            return match.group(0)
-        fragment = ''
+            return original
+        raw_fragment = ''
         if '#' in link_path:
-            link_path, fragment = link_path.split('#', 1)
-            fragment = '#' + fragment
+            link_path, raw_fragment = link_path.split('#', 1)
+        fragment = transliterate_anchor(raw_fragment)
+        fragment_str = f'#{fragment}' if fragment else ''
+        if not link_path:
+            return f'[{match.group(1)}]({fragment_str})'
         resolved = os.path.normpath(os.path.join(file_dir, link_path))
         document_id = path_to_id.get(resolved)
         if document_id is None:
-            return match.group(0)
+            if fragment != raw_fragment:
+                return f'[{match.group(1)}]({link_path}{fragment_str})'
+            return original
         try:
             doc_url = fetch_document_url(base_url, token, document_id,
                                          url_cache)
-            return f'[{match.group(1)}]({doc_url}{fragment})'
+            return f'[{match.group(1)}]({doc_url}{fragment_str})'
         except Exception as e:
             print(f'Warning: failed to resolve link {resolved}: {e}')
-            return match.group(0)
+            return original
 
     return re.sub(r'\[([^\]]+)\]\(([^)]+)\)', replace_link, content)
 
