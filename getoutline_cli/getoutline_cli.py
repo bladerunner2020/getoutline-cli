@@ -1,10 +1,25 @@
 #!/usr/bin/env python3
 import os
+import sys
 import yaml
 import re
 import requests
 import argparse
 from importlib.metadata import version, PackageNotFoundError
+
+_RESET = '\033[0m'
+_GREEN = '\033[32m'
+_YELLOW = '\033[33m'
+_RED = '\033[31m'
+_CYAN = '\033[36m'
+_WHITE = '\033[97m'
+_BOLD = '\033[1m'
+
+
+def _color(text, *codes):
+    if not sys.stdout.isatty():
+        return text
+    return ''.join(codes) + text + _RESET
 
 
 def load_config(config_path):
@@ -41,13 +56,39 @@ def apply_substitutions(content, substitutions):
 
 
 TRANSLIT_MAP = {
-    'а': 'a',  'б': 'b',  'в': 'v',  'г': 'g',  'д': 'd',
-    'е': 'e',  'ё': 'yo', 'ж': 'zh', 'з': 'z',  'и': 'i',
-    'й': 'j',  'к': 'k',  'л': 'l',  'м': 'm',  'н': 'n',
-    'о': 'o',  'п': 'p',  'р': 'r',  'с': 's',  'т': 't',
-    'у': 'u',  'ф': 'f',  'х': 'kh', 'ц': 'ts', 'ч': 'ch',
-    'ш': 'sh', 'щ': 'shch', 'ъ': '', 'ы': 'y',  'ь': '',
-    'э': 'e',  'ю': 'yu', 'я': 'ya',
+    'а': 'a',
+    'б': 'b',
+    'в': 'v',
+    'г': 'g',
+    'д': 'd',
+    'е': 'e',
+    'ё': 'yo',
+    'ж': 'zh',
+    'з': 'z',
+    'и': 'i',
+    'й': 'j',
+    'к': 'k',
+    'л': 'l',
+    'м': 'm',
+    'н': 'n',
+    'о': 'o',
+    'п': 'p',
+    'р': 'r',
+    'с': 's',
+    'т': 't',
+    'у': 'u',
+    'ф': 'f',
+    'х': 'kh',
+    'ц': 'ts',
+    'ч': 'ch',
+    'ш': 'sh',
+    'щ': 'shch',
+    'ъ': '',
+    'ы': 'y',
+    'ь': '',
+    'э': 'e',
+    'ю': 'yu',
+    'я': 'ya',
 }
 
 
@@ -93,15 +134,19 @@ def resolve_internal_links(content, file_path, path_to_id, base_url, token,
         resolved = os.path.normpath(os.path.join(file_dir, link_path))
         document_id = path_to_id.get(resolved)
         if document_id is None:
-            if fragment != raw_fragment:
-                return f'[{match.group(1)}]({link_path}{fragment_str})'
-            return original
+            print(
+                _color('Warning: no document configured', _YELLOW, _BOLD) +
+                '\n' + _color(f'  link: {resolved}', _YELLOW) + '\n' +
+                _color(f'  referenced in: {file_path}', _YELLOW))
+            return match.group(1)
         try:
             doc_url = fetch_document_url(base_url, token, document_id,
                                          url_cache)
             return f'[{match.group(1)}]({doc_url}{fragment_str})'
         except Exception as e:
-            print(f'Warning: failed to resolve link {resolved}: {e}')
+            print(
+                _color(f'Warning: failed to resolve link {resolved}: {e}',
+                       _YELLOW, _BOLD))
             return original
 
     return re.sub(r'\[([^\]]+)\]\(([^)]+)\)', replace_link, content)
@@ -143,7 +188,7 @@ def publish_file(url, token, document_id, title, content, append, publish):
     except requests.exceptions.HTTPError as err:
         status_code = err.response.status_code
         text = err.response.text
-        print(f'HTTP error occurred: {status_code} - {text}')
+        print(_color(f'Error: {status_code} - {text}', _RED, _BOLD))
         exit(1)
 
 
@@ -158,7 +203,8 @@ def main():
 
     parser = argparse.ArgumentParser(
         description='Publish markdown files to Outline wiki.')
-    parser.add_argument('--version', action='version',
+    parser.add_argument('--version',
+                        action='version',
                         version=f'getoutline-cli v{pkg_version}')
     parser.add_argument('--config',
                         help='Path to the configuration yaml file.',
@@ -168,7 +214,7 @@ def main():
                         action='store_true')
 
     args = parser.parse_args()
-    print(f'getoutline-cli v{pkg_version}')
+    print(_color(f'getoutline-cli v{pkg_version}', _CYAN, _BOLD))
     preview = args.preview
 
     # Load configuration file
@@ -198,8 +244,7 @@ def main():
 
     path_to_id = {
         os.path.normpath(fc['path']): fc['id']
-        for fc in files
-        if fc.get('path') and fc.get('id')
+        for fc in files if fc.get('path') and fc.get('id')
     }
     url_cache = {}
 
@@ -217,7 +262,8 @@ def main():
         title = config.get('title')
         append = config.get('append', False)
         publish = config.get('publish', True)
-        substitutions = global_substitutions + file_config.get('substitutions', [])
+        substitutions = global_substitutions + file_config.get(
+            'substitutions', [])
 
         with open(path, 'r') as file:
             content = file.read()
@@ -230,13 +276,16 @@ def main():
 
         if preview:
             # Preview the changes without publishing
-            print(f'Previewing: {path} => {url}/doc/{document_id}')
+            print(
+                _color(f'Previewing: {path} => {url}/doc/{document_id}',
+                       _CYAN))
             print(content)
         else:
-            # Publish the file to the Outline wiki
             publish_file(url, token, document_id, title, content, append,
                          publish)
-            print(f'Published: {path} => {url}/doc/{document_id}')
+            print(
+                _color('Published: ', _GREEN, _BOLD) + _color(path, _WHITE) +
+                f' => {url}/doc/{document_id}')
 
 
 if __name__ == '__main__':
