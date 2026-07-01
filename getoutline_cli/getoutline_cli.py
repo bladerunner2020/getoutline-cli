@@ -209,25 +209,34 @@ def main():
     parser.add_argument('--config',
                         help='Path to the configuration yaml file.',
                         default='.outline-cli.yml')
+    parser.add_argument('--file',
+                        help='Publish only the document with this path.',
+                        metavar='PATH')
+    parser.add_argument('--id',
+                        help='Publish only the document with this id.',
+                        metavar='ID')
+    parser.add_argument('--dry-run',
+                        help='Process files without publishing.',
+                        action='store_true')
     parser.add_argument('--preview',
-                        help='Preview the changes without publishing.',
+                        help='Print processed content (requires --file or --id).',
                         action='store_true')
 
     args = parser.parse_args()
-    print(_color(f'getoutline-cli v{pkg_version}', _CYAN, _BOLD))
-    preview = args.preview
 
-    # Load configuration file
+    if args.preview and not args.file and not args.id:
+        parser.error('--preview requires --file or --id')
+
+    print(_color(f'getoutline-cli v{pkg_version}', _CYAN, _BOLD))
+
     config = load_config(args.config)
 
-    # Setup Outline URL
     url = config.get('url') or os.getenv('OUTLINE_URL')
     if not url:
         raise ValueError('Outline URL is required either in the configuration '
                          'file (field `url`) or as an environment variable '
                          '`OUTLINE_URL`.')
 
-    # Setup Outline API token
     token = config.get('token') or os.getenv('OUTLINE_API_TOKEN')
     if not token:
         raise ValueError(
@@ -235,21 +244,28 @@ def main():
             '(field `token`) or as an environment variable '
             '`OUTLINE_API_TOKEN.`')
 
-    # Setup files to publish
     files = config.get('files')
     if not files:
         raise ValueError('Missing files in configuration.')
+
+    if args.file:
+        files = [fc for fc in files if fc.get('path') == args.file]
+        if not files:
+            raise ValueError(f'No document configured for path: {args.file}')
+    elif args.id:
+        files = [fc for fc in files if fc.get('id') == args.id]
+        if not files:
+            raise ValueError(f'No document configured for id: {args.id}')
 
     global_substitutions = config.get('substitutions', [])
 
     path_to_id = {
         os.path.normpath(fc['path']): fc['id']
-        for fc in files if fc.get('path') and fc.get('id')
+        for fc in config.get('files', []) if fc.get('path') and fc.get('id')
     }
     url_cache = {}
 
     for file_config in files:
-        # Required parameters
         path = file_config.get('path')
         document_id = file_config.get('id')
 
@@ -258,28 +274,31 @@ def main():
         if not document_id:
             raise ValueError('Missing id in configuration for file: ' + path)
 
-        # Optional parameters
         title = config.get('title')
         append = config.get('append', False)
         publish = config.get('publish', True)
         substitutions = global_substitutions + file_config.get(
             'substitutions', [])
 
-        with open(path, 'r') as file:
-            content = file.read()
+        try:
+            with open(path, 'r') as file:
+                content = file.read()
+        except FileNotFoundError:
+            print(_color(f'Error: file not found — {path}', _RED, _BOLD))
+            continue
 
         content = resolve_internal_links(content, path, path_to_id, url, token,
                                          url_cache)
-
-        # Apply substitutions if any
         content = apply_substitutions(content, substitutions)
 
-        if preview:
-            # Preview the changes without publishing
-            print(
-                _color(f'Previewing: {path} => {url}/doc/{document_id}',
-                       _CYAN))
+        if args.preview:
+            print(_color(f'Preview: ', _CYAN, _BOLD) + _color(path, _WHITE) +
+                  f' => {url}/doc/{document_id}')
             print(content)
+        elif args.dry_run:
+            print(
+                _color('Dry run: ', _CYAN, _BOLD) + _color(path, _WHITE) +
+                f' => {url}/doc/{document_id}')
         else:
             publish_file(url, token, document_id, title, content, append,
                          publish)
