@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.6.0 (2026-07-01)
+
+### Added
+
+- `--file <path>`: publish a single document by file path.
+- `--id <id>`: publish a single document by Outline document id.
+- `--dry-run`: full processing (link resolution, substitutions) without publishing.
+- `--preview`: now requires `--file` or `--id`, prints processed content for the selected document.
+- Colored output: `Published:` in green, `Dry run:` in cyan, warnings in yellow, errors in red. Colors are suppressed when output is piped.
+
+### Fixed
+
+- Unresolved internal links (document not in config) now print a warning with the link path and source file, and the link is stripped from the content instead of producing a broken URL.
+- Missing file on disk prints a red error and continues instead of crashing.
+
 ## 0.5.0 (2026-06-24)
 
 ### Added
